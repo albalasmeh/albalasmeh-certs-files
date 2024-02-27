@@ -46,6 +46,7 @@ fontcolor = urlparam[4]
 fontSize = int(float(urlparam[5]))
 harddate = urlparam[6]
 datemargin_bottom = int(float(urlparam[7]))
+datemargin_left = int(float(urlparam[8]))
 print("text position in certificate: ",textpos)   
 urllib.request.urlretrieve(
   
@@ -109,7 +110,7 @@ def make_certificates(name):
             date_margin_left = 320  # Margin from the left for the date
             #date_margin_bottom = 300  # Margin from the bottom for the date
 
-            date_x = date_margin_left
+            date_x = datemargin_left
             # #date_y = HEIGHT - DATE_FONT_FILE.getsize(date)[1] - date_margin_bottom
             # date_y = HEIGHT - draw.textsize(date, font=DATE_FONT_FILE)[1] - date_margin_bottom
                # Adjusted part for calculating the date's y position
