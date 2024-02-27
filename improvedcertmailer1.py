@@ -130,13 +130,18 @@ def send_cert_email(reciveremail,name):
         msg['Subject'] = "Certificate of Attendance - Dr Taha Alblasmeh"
         msg['From'] = SENDER
         msg['To'] = RECEIVER
+        msg['Reply-To'] = "albalasmehcert@gmail.com"
         newname = name.translate(str.maketrans('', '', string.punctuation))
         msg_body = MIMEMultipart('alternative')
         # text based email body
         BODY_TEXT = "Dear,\n\rPlease using the given link to register today."
 
-        HtmlFile = open('params/body.html', 'r', encoding='utf-8')
-        BODY_HTML = HtmlFile.read() 
+        # Opening and reading the HTML email template
+        with open('params/body.html', 'r', encoding='utf-8') as HtmlFile:
+            BODY_HTML = HtmlFile.read()
+        
+        # Replacing {{name}} in the HTML content with the actual name
+        BODY_HTML = BODY_HTML.replace('{{name}}', newname)
         textpart = MIMEText(BODY_TEXT.encode(CHARSET), 'plain', CHARSET)
         htmlpart = MIMEText(BODY_HTML.encode(CHARSET), 'html', CHARSET)
 
