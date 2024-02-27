@@ -88,7 +88,8 @@ def make_certificates(name):
         draw = ImageDraw.Draw(rgb)
         try:
             # Finding the width and height of the text. 
-            name_width, name_height = draw.textsize(name, font=FONT_FILE)
+            name_bbox = FONT_FILE.getbbox(name)
+            name_width, name_height = name_bbox[2], name_bbox[3]
 
             # Placing it in the center, then making some adjustments.
             draw.text(((WIDTH - name_width) / 2, (HEIGHT - name_height) / textpos - 31), name, fill=FONT_COLOR, font=FONT_FILE)
