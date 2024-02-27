@@ -1,3 +1,38 @@
+
+from threading import Thread
+from time import perf_counter
+from PIL import Image, ImageFont, ImageDraw
+import glob
+import pandas as pd
+import requests
+from io import BytesIO
+import urllib.request
+from urllib.request import urlretrieve
+import xlrd
+import smtplib
+import os
+import sys
+from email.mime.text import MIMEText
+from email.mime.application import MIMEApplication
+from email.mime.multipart import MIMEMultipart
+import boto3
+import string
+import re
+
+def is_valid_email(email):
+    email_regex = re.compile(r"[^@]+@[^@]+\.[^@]+")
+    return email_regex.match(email)
+
+
+ses_client = boto3.client('ses', region_name='us-east-1')
+
+# Global Variables
+SHEET_URL_PARAMS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vStfiD-UlNpvWPKAboWqqa_0FR3HbffWDryPfkGZhkGqZ1klYfiIUj_ixhb-RYdy4fKgwS3qwAEbKG5/pub?gid=1419166889&single=true&output=csv'
+SHEET_URL_LIST = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vStfiD-UlNpvWPKAboWqqa_0FR3HbffWDryPfkGZhkGqZ1klYfiIUj_ixhb-RYdy4fKgwS3qwAEbKG5/pub?gid=0&single=true&output=csv'
+
+urllib.request.urlretrieve(
+  SHEET_URL_PARAMS,
+   "params/params.csv")
 params_col_list = ["Item", "URLofparam"]
 allparams = pd.read_csv("params/params.csv", usecols=params_col_list)
 itemparam = allparams["Item"]
