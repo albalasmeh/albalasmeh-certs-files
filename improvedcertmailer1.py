@@ -68,81 +68,101 @@ def remove_dir_content():
     for f in files:
         os.remove(f)
 def make_certificates(name):
-    '''Function to save certificates as a .png file'''
-
-    image_sourcergba = Image.open(r'params/certtemp.png')
-
-    rgb = Image.new('RGB', image_sourcergba.size, (255, 255, 255))  # white background
-    rgb.paste(image_sourcergba, mask=image_sourcergba.split()[3])               # paste using alpha channel as mask
-
-    newname = name.translate(str.maketrans('', '', string.punctuation))
-
-    draw = ImageDraw.Draw(rgb)
     try:
-        # Finding the width and height of the text. 
-        #name_width, name_height = FONT_FILE.getsize(name)
-        name_bbox = FONT_FILE.getbbox(name)
-        name_width, name_height = name_bbox[2], name_bbox[3]
+        '''Function to save certificates as a .png file'''
 
-        # Placing it in the center, then making some adjustments.
-        draw.text(((WIDTH - name_width) / 2, (HEIGHT - name_height) / textpos - 31), name, fill=FONT_COLOR, font=FONT_FILE)
 
-        rgb.save('out/' + newname.replace(" ", "_") + '.pdf', "PDF", resolution=100.0)
+        image_sourcergba = Image.open(r'params/certtemp.png')
 
+        
+        rgb = Image.new('RGB', image_sourcergba.size, (255, 255, 255))  # white background
+                # Check if the image does not have an alpha channel
+        if image_sourcergba.mode != 'RGBA':
+            # Convert the image to 'RGBA' to add an alpha channel
+            image_sourcergba = image_sourcergba.convert('RGBA')
+        
+        rgb.paste(image_sourcergba, mask=image_sourcergba.split()[3])  # paste using alpha channel as mask
+       
+
+        #rgb.paste(image_sourcergba, mask=image_sourcergba.split()[3])               # paste using alpha channel as mask
+    
+        newname = name.translate(str.maketrans('', '', string.punctuation))
+
+        draw = ImageDraw.Draw(rgb)
+        try:
+            # Finding the width and height of the text. 
+            name_bbox = FONT_FILE.getbbox(name)
+            name_width, name_height = name_bbox[2], name_bbox[3]
+
+            # Placing it in the center, then making some adjustments.
+            draw.text(((WIDTH - name_width) / 2, (HEIGHT - name_height) / textpos - 31), name, fill=FONT_COLOR, font=FONT_FILE)
+        
+                
+            rgb.save( 'out/'+newname.replace(" ", "_")+'.pdf', "PDF", resolution=100.0)
+
+        except Exception as e:
+            print("Error: ", e)
     except Exception as e:
-        print("Error: ", e)
+        print(f"Error creating certificate for '{name}': {e}")
+  
 
 def send_cert_email(reciveremail,name):
-    SENDER = "Ahmed AlQadasi <team@ahmedalqadasi.com>"
-    RECEIVER = reciveremail
-    CHARSET = "utf-8"
-    msg = MIMEMultipart('mixed')
-    msg['Subject'] = "Certificate of Attendance - Ahmed AlQadasi"
-    msg['From'] = SENDER
-    msg['To'] = RECEIVER
-    newname = name.translate(str.maketrans('', '', string.punctuation))
-    msg_body = MIMEMultipart('alternative')
-    # text based email body
-    BODY_TEXT = "Dear,\n\rPlease using the given link to register today."
-
-    HtmlFile = open('params/body.html', 'r', encoding='utf-8')
-    BODY_HTML = HtmlFile.read() 
-    textpart = MIMEText(BODY_TEXT.encode(CHARSET), 'plain', CHARSET)
-    htmlpart = MIMEText(BODY_HTML.encode(CHARSET), 'html', CHARSET)
-
-    msg_body.attach(textpart)
-    msg_body.attach(htmlpart)
-
-    # Full path to the file that will be attached to the email.
-    ATTACHMENT1 = 'out/'+newname.replace(" ", "_")+'.pdf'
-    ATTACHMENT2 = 'out/'+newname.replace(" ", "_")+'.pdf'
-
-    # Adding attachments
-    att1 = MIMEApplication(open(ATTACHMENT1, 'rb').read())
-    att1.add_header('Content-Disposition', 'attachment',
-                    filename=os.path.basename(ATTACHMENT1))
-    att2 = MIMEApplication(open(ATTACHMENT1, 'rb').read())
-    att2.add_header('Content-Disposition', 'attachment',
-                    filename=os.path.basename(ATTACHMENT2))
-
-    msg.attach(msg_body)
-    msg.attach(att1)
-    msg.attach(att2)
-
     try:
-        response = ses_client.send_raw_email(
-            Source=SENDER,
-            Destinations=[
-                RECEIVER
-            ],
-            RawMessage={
-                'Data': msg.as_string(),
-            },
-            #ConfigurationSetName="ConfigSet"
-        )
+        if not is_valid_email(reciveremail):
+            print(f"Skipping invalid email: {reciveremail}")
+            return
+        SENDER = "Dr Taha Alblasmeh <certificates@drtahaalblasmeh.com>"
+        RECEIVER = reciveremail
+        CHARSET = "utf-8"
+        msg = MIMEMultipart('mixed')
+        msg['Subject'] = "Certificate of Attendance - Dr Taha Alblasmeh"
+        msg['From'] = SENDER
+        msg['To'] = RECEIVER
+        newname = name.translate(str.maketrans('', '', string.punctuation))
+        msg_body = MIMEMultipart('alternative')
+        # text based email body
+        BODY_TEXT = "Dear,\n\rPlease using the given link to register today."
 
+        HtmlFile = open('params/body.html', 'r', encoding='utf-8')
+        BODY_HTML = HtmlFile.read() 
+        textpart = MIMEText(BODY_TEXT.encode(CHARSET), 'plain', CHARSET)
+        htmlpart = MIMEText(BODY_HTML.encode(CHARSET), 'html', CHARSET)
+
+        msg_body.attach(textpart)
+        msg_body.attach(htmlpart)
+
+        # Full path to the file that will be attached to the email.
+        ATTACHMENT1 = 'out/'+newname.replace(" ", "_")+'.pdf'
+        ATTACHMENT2 = 'out/'+newname.replace(" ", "_")+'.pdf'
+
+        # Adding attachments
+        att1 = MIMEApplication(open(ATTACHMENT1, 'rb').read())
+        att1.add_header('Content-Disposition', 'attachment',
+                        filename=os.path.basename(ATTACHMENT1))
+        att2 = MIMEApplication(open(ATTACHMENT1, 'rb').read())
+        att2.add_header('Content-Disposition', 'attachment',
+                        filename=os.path.basename(ATTACHMENT2))
+
+        msg.attach(msg_body)
+        msg.attach(att1)
+        msg.attach(att2)
+
+        try:
+            response = ses_client.send_raw_email(
+                Source=SENDER,
+                Destinations=[
+                    RECEIVER
+                ],
+                RawMessage={
+                    'Data': msg.as_string(),
+                },
+                #ConfigurationSetName="ConfigSet"
+            )
+
+        except Exception as e:
+            print("Error: ", e)
     except Exception as e:
-        print("Error: ", e)
+        print(f"Error sending email to '{reciveremail}' for '{name}': {e}")  
         
 def main():
     col_list = ["Name", "Emailsofparticipant"]
@@ -191,3 +211,5 @@ if __name__ == "__main__":
 
     end_time = perf_counter()
     print(f'It took {end_time- start_time :0.2f} second(s) to complete.')
+
+
