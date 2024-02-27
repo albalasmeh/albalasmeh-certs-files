@@ -48,6 +48,8 @@ def make_certificates(name):
     textpos = float(urlparam[3])
     fontcolor = urlparam[4]
     fontSize = fontSize = int(float(urlparam[5]))
+    harddate = urlparam[6]
+    datemargin_bottom = int(float(urlparam[7]))
     urllib.request.urlretrieve(fonttemplatelink, "font.ttf")
     urllib.request.urlretrieve(SHEET_URL_LIST, "params/list2.csv")
     urllib.request.urlretrieve(certtemplatelink, "params/certtemp.png")
@@ -75,17 +77,20 @@ def make_certificates(name):
     draw.text(((WIDTH - name_width) / 2, (HEIGHT - name_height) / textpos - 31), name, fill=FONT_COLOR, font=FONT_FILE)
 
     # Decide on the date format and calculate its position
-    date = datetime.datetime.now().strftime("%B %d, %Y")  # Format the date as "Month DD, YYYY"
-    DATE_FONT_SIZE = int(fontSize * 0.5)  # Adjust the date font size as needed
+    #date = datetime.datetime.now().strftime("%B %d, %Y")  # Format the date as "Month DD, YYYY"
+    date = harddate
+    DATE_FONT_SIZE = int(fontSize * 0.6)  # Adjust the date font size as needed
     DATE_FONT_FILE = ImageFont.truetype(r'font.ttf', DATE_FONT_SIZE)
     date_margin_left = 320  # Margin from the left for the date
-    date_margin_bottom = 300  # Margin from the bottom for the date
+    #date_margin_bottom = 300  # Margin from the bottom for the date
+
     date_x = date_margin_left
-    #date_y = HEIGHT - DATE_FONT_FILE.getsize(date)[1] - date_margin_bottom
-   # Adjusted part for calculating the date's y position
+    # #date_y = HEIGHT - DATE_FONT_FILE.getsize(date)[1] - date_margin_bottom
+    # date_y = HEIGHT - draw.textsize(date, font=DATE_FONT_FILE)[1] - date_margin_bottom
+        # Adjusted part for calculating the date's y position
     date_bbox = DATE_FONT_FILE.getbbox(date)
     date_height = date_bbox[3] - date_bbox[1]  # Bottom - Top
-    date_y = HEIGHT - date_height - date_margin_bottom
+    date_y = HEIGHT - date_height - datemargin_bottom
 
     # Draw the date using the calculated x and y positions
     draw.text((date_x, date_y), date, fill=FONT_COLOR, font=DATE_FONT_FILE)
@@ -97,7 +102,7 @@ def make_certificates(name):
     except Exception as e:
         print("Error: ", e)
 
-    return textpos, fontcolor, fontSize
+    return textpos, fontcolor, fontSize, datemargin_bottom, harddate
 
 
 @app.get("/template")
@@ -108,7 +113,7 @@ async def show_image(token: str = Query(None)):
     name = "Dr Taha Abdullah Mohammed Albalasmeh"
     
 
-    textpos, fontcolor, fontSize = make_certificates(name)
+    textpos, fontcolor, fontSize, datemargin_bottom, harddate = make_certificates(name)
 
     image_html = f"""
     <html>
@@ -116,6 +121,8 @@ async def show_image(token: str = Query(None)):
             <h2>Text Position: {textpos}</h2>
             <h2>Font Color: {fontcolor}</h2>
             <h2>Font Size: {fontSize}</h2>
+            <h2>Date: {harddate}</h2>
+            <h2>Date Margin Bottom: {datemargin_bottom}</h2>
             <h1>Here is the template:</h1>
             <img src="/static/template.png" alt="Certificate" />
         </body>
