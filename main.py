@@ -13,6 +13,7 @@ from fastapi import FastAPI, HTTPException, Query, Request, Response
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
+import datetime
 
 
 app = FastAPI()
@@ -52,42 +53,54 @@ def make_certificates(name):
     urllib.request.urlretrieve(certtemplatelink, "params/certtemp.png")
     urllib.request.urlretrieve(bodytemplatelink, "params/body.html")
     FONT_FILE = ImageFont.truetype(r'font.ttf', fontSize)
-    FONT_COLOR = fontcolor
+    FONT_COLOR = fontcolor  # You can use the same font color for both name and date
+
+    # Load template and calculate its dimensions
     template = Image.open(r'params/certtemp.png')
     WIDTH, HEIGHT = template.size
-    '''Function to save certificates as a .png file'''
 
-    image_sourcergba = Image.open(r'params/certtemp.png')
+    # Convert the template to RGB if necessary and prepare for drawing
+    image_source_rgba = Image.open(r'params/certtemp.png')
+    rgb = Image.new('RGB', image_source_rgba.size, (255, 255, 255))  # white background
+    if image_source_rgba.mode != 'RGBA':
+        image_source_rgba = image_source_rgba.convert('RGBA')
+    rgb.paste(image_source_rgba, mask=image_source_rgba.split()[3])  # paste using alpha channel as mask
 
-    rgb = Image.new('RGB', image_sourcergba.size, (255, 255, 255))  # white background
-    # Check if the image does not have an alpha channel
-    if image_sourcergba.mode != 'RGBA':
-    # Convert the image to 'RGBA' to add an alpha channel
-        image_sourcergba = image_sourcergba.convert('RGBA')
-    rgb.paste(image_sourcergba, mask=image_sourcergba.split()[3])               # paste using alpha channel as mask
-
-    newname = name.translate(str.maketrans('', '', string.punctuation))
-
+    # Prepare drawing context
     draw = ImageDraw.Draw(rgb)
+
+    # Draw the name
+    name_bbox = FONT_FILE.getbbox(name)
+    name_width, name_height = name_bbox[2], name_bbox[3]
+    draw.text(((WIDTH - name_width) / 2, (HEIGHT - name_height) / textpos - 31), name, fill=FONT_COLOR, font=FONT_FILE)
+
+    # Decide on the date format and calculate its position
+    date = datetime.datetime.now().strftime("%B %d, %Y")  # Format the date as "Month DD, YYYY"
+    DATE_FONT_SIZE = int(fontSize * 0.5)  # Adjust the date font size as needed
+    DATE_FONT_FILE = ImageFont.truetype(r'font.ttf', DATE_FONT_SIZE)
+    date_margin_left = 320  # Margin from the left for the date
+    date_margin_bottom = 300  # Margin from the bottom for the date
+    date_x = date_margin_left
+    date_y = HEIGHT - DATE_FONT_FILE.getsize(date)[1] - date_margin_bottom
+
+    # Draw the date
+    draw.text((date_x, date_y), date, fill=FONT_COLOR, font=DATE_FONT_FILE)
+
+    # Save the image
     try:
-        # Finding the width and height of the text. 
-        #name_width, name_height = FONT_FILE.getsize(name)
-        name_bbox = FONT_FILE.getbbox(name)
-        name_width, name_height = name_bbox[2], name_bbox[3]
-
-        # Placing it in the center, then making some adjustments.
-        draw.text(((WIDTH - name_width) / 2, (HEIGHT - name_height) / textpos - 31), name, fill=FONT_COLOR, font=FONT_FILE)
-
         rgb.save('static/template.png', "PNG", resolution=100.0)
     except Exception as e:
         print("Error: ", e)
+
     return textpos, fontcolor, fontSize
+
+
 @app.get("/template")
 async def show_image(token: str = Query(None)):
     if token != SECRET_TOKEN:
         raise HTTPException(status_code=401, detail="Unauthorized")
 
-    name = "Dr Tah Abdullah Mohammed Albalasmeh"
+    name = "Dr Taha Abdullah Mohammed Albalasmeh"
     
 
     textpos, fontcolor, fontSize = make_certificates(name)
