@@ -105,7 +105,8 @@ def make_certificates(name):
             date_margin_left = 320  # Margin from the left for the date
             date_margin_bottom = 300  # Margin from the bottom for the date
             date_x = date_margin_left
-            date_y = HEIGHT - DATE_FONT_FILE.getsize(date)[1] - date_margin_bottom
+            #date_y = HEIGHT - DATE_FONT_FILE.getsize(date)[1] - date_margin_bottom
+            date_y = HEIGHT - draw.textsize(date, font=DATE_FONT_FILE)[1] - date_margin_bottom
 
             # Draw the date
             draw.text((date_x, date_y), date, fill=FONT_COLOR, font=DATE_FONT_FILE)
