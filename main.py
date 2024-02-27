@@ -50,6 +50,8 @@ def make_certificates(name):
     fontSize = fontSize = int(float(urlparam[5]))
     harddate = urlparam[6]
     datemargin_bottom = int(float(urlparam[7]))
+    datemargin_left = int(float(urlparam[8]))
+
     urllib.request.urlretrieve(fonttemplatelink, "font.ttf")
     urllib.request.urlretrieve(SHEET_URL_LIST, "params/list2.csv")
     urllib.request.urlretrieve(certtemplatelink, "params/certtemp.png")
@@ -84,7 +86,7 @@ def make_certificates(name):
     date_margin_left = 320  # Margin from the left for the date
     #date_margin_bottom = 300  # Margin from the bottom for the date
 
-    date_x = date_margin_left
+    date_x = datemargin_left
     # #date_y = HEIGHT - DATE_FONT_FILE.getsize(date)[1] - date_margin_bottom
     # date_y = HEIGHT - draw.textsize(date, font=DATE_FONT_FILE)[1] - date_margin_bottom
         # Adjusted part for calculating the date's y position
@@ -102,7 +104,7 @@ def make_certificates(name):
     except Exception as e:
         print("Error: ", e)
 
-    return textpos, fontcolor, fontSize, datemargin_bottom, harddate
+    return textpos, fontcolor, fontSize, datemargin_bottom, harddate, datemargin_left
 
 
 @app.get("/template")
@@ -113,7 +115,7 @@ async def show_image(token: str = Query(None)):
     name = "Dr Taha Abdullah Mohammed Albalasmeh"
     
 
-    textpos, fontcolor, fontSize, datemargin_bottom, harddate = make_certificates(name)
+    textpos, fontcolor, fontSize, datemargin_bottom, harddate, datemargin_left = make_certificates(name)
 
     image_html = f"""
     <html>
@@ -123,6 +125,7 @@ async def show_image(token: str = Query(None)):
             <h2>Font Size: {fontSize}</h2>
             <h2>Date: {harddate}</h2>
             <h2>Date Margin Bottom: {datemargin_bottom}</h2>
+            <h2>Date Margin Left: {datemargin_left}</h2>
             <h1>Here is the template:</h1>
             <img src="/static/template.png" alt="Certificate" />
         </body>
