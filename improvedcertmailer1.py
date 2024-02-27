@@ -105,11 +105,16 @@ def make_certificates(name):
             date_margin_left = 320  # Margin from the left for the date
             date_margin_bottom = 300  # Margin from the bottom for the date
             date_x = date_margin_left
-            #date_y = HEIGHT - DATE_FONT_FILE.getsize(date)[1] - date_margin_bottom
-            date_y = HEIGHT - draw.textsize(date, font=DATE_FONT_FILE)[1] - date_margin_bottom
+            # #date_y = HEIGHT - DATE_FONT_FILE.getsize(date)[1] - date_margin_bottom
+            # date_y = HEIGHT - draw.textsize(date, font=DATE_FONT_FILE)[1] - date_margin_bottom
+               # Adjusted part for calculating the date's y position
+            date_bbox = DATE_FONT_FILE.getbbox(date)
+            date_height = date_bbox[3] - date_bbox[1]  # Bottom - Top
+            date_y = HEIGHT - date_height - date_margin_bottom
 
-            # Draw the date
+            # Draw the date using the calculated x and y positions
             draw.text((date_x, date_y), date, fill=FONT_COLOR, font=DATE_FONT_FILE)
+
                 
             rgb.save( 'out/'+newname.replace(" ", "_")+'.pdf', "PDF", resolution=100.0)
 
