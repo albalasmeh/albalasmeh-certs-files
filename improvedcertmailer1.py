@@ -44,6 +44,8 @@ bodytemplatelink = urlparam[2]
 textpos = float(urlparam[3])
 fontcolor = urlparam[4]
 fontSize = int(float(urlparam[5]))
+harddate = urlparam[6]
+datemargin_bottom = int(float(urlparam[7]))
 print("text position in certificate: ",textpos)   
 urllib.request.urlretrieve(
   
@@ -99,18 +101,21 @@ def make_certificates(name):
             draw.text(((WIDTH - name_width) / 2, (HEIGHT - name_height) / textpos - 31), name, fill=FONT_COLOR, font=FONT_FILE)
             
             # Decide on the date format and calculate its position
-            date = datetime.datetime.now().strftime("%B %d, %Y")  # Format the date as "Month DD, YYYY"
+            #date = datetime.datetime.now().strftime("%B %d, %Y")  # Format the date as "Month DD, YYYY"
+                #date = datetime.datetime.now().strftime("%B %d, %Y")  # Format the date as "Month DD, YYYY"
+            date = harddate
             DATE_FONT_SIZE = int(fontSize * 0.5)  # Adjust the date font size as needed
             DATE_FONT_FILE = ImageFont.truetype(r'font.ttf', DATE_FONT_SIZE)
             date_margin_left = 320  # Margin from the left for the date
-            date_margin_bottom = 300  # Margin from the bottom for the date
+            #date_margin_bottom = 300  # Margin from the bottom for the date
+
             date_x = date_margin_left
             # #date_y = HEIGHT - DATE_FONT_FILE.getsize(date)[1] - date_margin_bottom
             # date_y = HEIGHT - draw.textsize(date, font=DATE_FONT_FILE)[1] - date_margin_bottom
                # Adjusted part for calculating the date's y position
             date_bbox = DATE_FONT_FILE.getbbox(date)
             date_height = date_bbox[3] - date_bbox[1]  # Bottom - Top
-            date_y = HEIGHT - date_height - date_margin_bottom
+            date_y = HEIGHT - date_height - datemargin_bottom
 
             # Draw the date using the calculated x and y positions
             draw.text((date_x, date_y), date, fill=FONT_COLOR, font=DATE_FONT_FILE)
