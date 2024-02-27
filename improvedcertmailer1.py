@@ -18,6 +18,7 @@ from email.mime.multipart import MIMEMultipart
 import boto3
 import string
 import re
+import datetime
 
 def is_valid_email(email):
     email_regex = re.compile(r"[^@]+@[^@]+\.[^@]+")
@@ -96,7 +97,18 @@ def make_certificates(name):
 
             # Placing it in the center, then making some adjustments.
             draw.text(((WIDTH - name_width) / 2, (HEIGHT - name_height) / textpos - 31), name, fill=FONT_COLOR, font=FONT_FILE)
-        
+            
+            # Decide on the date format and calculate its position
+            date = datetime.datetime.now().strftime("%B %d, %Y")  # Format the date as "Month DD, YYYY"
+            DATE_FONT_SIZE = int(fontSize * 0.5)  # Adjust the date font size as needed
+            DATE_FONT_FILE = ImageFont.truetype(r'font.ttf', DATE_FONT_SIZE)
+            date_margin_left = 320  # Margin from the left for the date
+            date_margin_bottom = 300  # Margin from the bottom for the date
+            date_x = date_margin_left
+            date_y = HEIGHT - DATE_FONT_FILE.getsize(date)[1] - date_margin_bottom
+
+            # Draw the date
+            draw.text((date_x, date_y), date, fill=FONT_COLOR, font=DATE_FONT_FILE)
                 
             rgb.save( 'out/'+newname.replace(" ", "_")+'.pdf', "PDF", resolution=100.0)
 
